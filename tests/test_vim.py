@@ -259,3 +259,50 @@ def test_without_colorscheme_assertions_fail(tmp_path):
 
 def test_port_conventions():
     assert check_port(REPO, PALETTE.allowed_hex()) == []
+
+
+AIRLINE = REPO / "autoload" / "airline" / "themes" / "deepwick.vim"
+
+
+def test_airline_matches_generator():
+    import generate
+    assert AIRLINE.read_text(encoding="utf-8") == generate.render_airline(PALETTE)
+
+
+def test_airline_has_no_nvim_guard():
+    text = AIRLINE.read_text(encoding="utf-8")
+    assert "has('nvim')" not in text and "luaeval" not in text
+
+
+def entry(fg, bg, attr=""):
+    return [C[fg], C[bg], nearest_index(C[fg]), nearest_index(C[bg]), attr]
+
+
+@pytest.mark.skipif(shutil.which("vim") is None, reason="requires vim")
+def test_airline_palette(tmp_path):
+    import json
+    import subprocess
+    stub = tmp_path / "rt" / "autoload" / "airline" / "themes.vim"
+    stub.parent.mkdir(parents=True)
+    out = tmp_path / "palette.json"
+    stub.write_text(
+        "function! airline#themes#generate_color_map(a, b, c) abort\n"
+        "  return {'airline_a': a:a, 'airline_b': a:b, 'airline_c': a:c}\n"
+        "endfunction\n"
+    )
+    script = tmp_path / "dump.vim"
+    script.write_text(
+        f"set rtp^={tmp_path / 'rt'}\nsource {AIRLINE}\n"
+        f"call writefile([json_encode(g:airline#themes#deepwick#palette)], '{out}')\n"
+    )
+    subprocess.run(["vim", "-Nu", "NONE", "-i", "NONE", "-es", "-S", str(script), "-c", "qa!"],
+                   env={"HOME": str(tmp_path), "PATH": "/usr/bin:/bin"}, check=True, timeout=20)
+    palette = json.loads(out.read_text())
+    for mode, color in (("normal", "blue"), ("insert", "green"), ("visual", "magenta"), ("replace", "red"), ("commandline", "yellow")):
+        assert palette[mode]["airline_a"] == entry("background", color, "bold"), mode
+        assert palette[mode]["airline_b"] == entry("foreground", "overlay"), mode
+        assert palette[mode]["airline_c"] == entry("foreground", "surface"), mode
+    assert palette["inactive"]["airline_a"] == entry("muted", "surface")
+    for mode in ("normal", "insert", "visual", "replace"):
+        assert palette[f"{mode}_modified"]["airline_c"] == entry("yellow", "surface"), mode
+    assert palette["accents"]["red"] == [C["red"], "", nearest_index(C["red"]), "", ""]
