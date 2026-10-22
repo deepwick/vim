@@ -58,7 +58,7 @@ def test_every_hi_line_has_gui_and_cterm():
             continue
         for gui, cterm in (("guifg", "ctermfg"), ("guibg", "ctermbg")):
             assert gui in spec and cterm in spec, group
-            if spec[gui] != "NONE" and spec[cterm] != "NONE":
+            if spec[gui] != "NONE" and spec[cterm] != "NONE" and not group.startswith("Diff"):
                 assert int(spec[cterm]) == nearest_index(spec[gui]), (group, gui)
             if spec[cterm] != "NONE":
                 assert int(spec[cterm]) >= 16, (group, cterm)
@@ -173,10 +173,16 @@ def test_spell_undercurls(group, color):
     assert spec["cterm"] == "underline" and spec["ctermfg"] == str(nearest_index(C[color]))
 
 
-@pytest.mark.parametrize(("group", "color"), [("DiffAdd", "green"), ("DiffChange", "blue"), ("DiffDelete", "red"), ("DiffText", "blue")])
+@pytest.mark.parametrize(("group", "color"), [("DiffAdd", "green"), ("DiffChange", "blue"), ("DiffDelete", "red")])
 def test_cterm_diffs_use_git_colors(group, color):
     spec = resolve(group)
     assert spec["ctermfg"] == str(nearest_index(C[color])) and spec["ctermbg"] == "NONE"
+
+
+def test_cterm_diff_text_stands_out_from_diff_change():
+    spec = resolve("DiffText")
+    assert spec["ctermbg"] == str(nearest_index(C["selection"]))
+    assert (spec["ctermfg"], spec["ctermbg"]) != (resolve("DiffChange")["ctermfg"], resolve("DiffChange")["ctermbg"])
 
 
 VIM_ONLY = {
@@ -306,3 +312,13 @@ def test_airline_palette(tmp_path):
     for mode in ("normal", "insert", "visual", "replace"):
         assert palette[f"{mode}_modified"]["airline_c"] == entry("yellow", "surface"), mode
     assert palette["accents"]["red"] == [C["red"], "", nearest_index(C["red"]), "", ""]
+
+
+@requires_vim
+@pytest.mark.parametrize("truecolor", [True, False])
+def test_python_constants_are_keywords(tmp_path, truecolor):
+    rc = vimrc(tmp_path, truecolor=truecolor)
+    out = capture(f"vim -Nu {rc} -i NONE {SAMPLES / 'constants.py'}", isolated_env(tmp_path), size=(60, 6), wait_for="value")
+    want = hexof("blue") if truecolor else f"ansi256:{nearest_index(C['blue'])}"
+    for token in ("None", "True", "False"):
+        assert style_of(out, token)["fg"] == want, token

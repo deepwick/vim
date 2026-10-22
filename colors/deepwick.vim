@@ -56,7 +56,7 @@ hi SpellRare guifg=NONE guibg=NONE gui=undercurl ctermfg=175 ctermbg=NONE cterm=
 hi DiffAdd guifg=NONE guibg=#152424 gui=NONE ctermfg=71 ctermbg=NONE cterm=NONE
 hi DiffChange guifg=NONE guibg=#142240 gui=NONE ctermfg=74 ctermbg=NONE cterm=NONE
 hi DiffDelete guifg=#F44747 guibg=#341123 gui=NONE ctermfg=203 ctermbg=NONE cterm=NONE
-hi DiffText guifg=NONE guibg=#1D3252 gui=NONE ctermfg=74 ctermbg=NONE cterm=NONE
+hi DiffText guifg=NONE guibg=#1D3252 gui=NONE ctermfg=NONE ctermbg=24 cterm=NONE
 hi Added guifg=#57A64A guibg=NONE gui=NONE ctermfg=71 ctermbg=NONE cterm=NONE
 hi Changed guifg=#569CD6 guibg=NONE gui=NONE ctermfg=74 ctermbg=NONE cterm=NONE
 hi Removed guifg=#F44747 guibg=NONE gui=NONE ctermfg=203 ctermbg=NONE cterm=NONE
@@ -114,5 +114,13 @@ hi! link StatusLineTerm StatusLine
 hi! link StatusLineTermNC StatusLineNC
 hi! link pythonBuiltin Function
 hi! link cDefine Macro
+
+augroup deepwick_python
+  autocmd!
+  autocmd Syntax python if get(g:, 'colors_name', '') ==# 'deepwick'
+        \ | hi! link pythonBoolean Boolean | hi! link pythonConstant Boolean | endif
+augroup END
+hi! link pythonBoolean Boolean
+hi! link pythonConstant Boolean
 
 let g:terminal_ansi_colors = ['#1B2140', '#F44747', '#57A64A', '#DCDCAA', '#569CD6', '#C586C0', '#4EC9B0', '#D4D4D4', '#6E7899', '#FF7A7A', '#7FC46E', '#F2F2C4', '#9CDCFE', '#E0A8DC', '#7FE5CF', '#FFFFFF']

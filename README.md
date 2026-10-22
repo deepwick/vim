@@ -53,7 +53,8 @@ replace Red, command line Yellow. lightline isn't covered.
   need `let &t_8f = "\e[38;2;%lu;%lu;%lum"` and
   `let &t_8b = "\e[48;2;%lu;%lu;%lum"` for 24-bit color.
 - In 256-color mode the diff backgrounds would all turn the same dark gray,
-  so diffs show green, blue and red text instead.
+  so diffs show green, blue and red text instead, with the changed words on
+  Selection.
 - Vim's built-in syntax files are coarser than Tree-sitter, so some colors
   differ from the [Neovim port](https://github.com/deepwick/neovim) and
   [bat](https://github.com/deepwick/bat):

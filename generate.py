@@ -119,8 +119,10 @@ LINKS = {
     "StatusLineTermNC": "StatusLineNC", "pythonBuiltin": "Function", "cDefine": "Macro",
 }
 
-# 256-color diffs: the diff backgrounds all land on near-identical grays, so cterm shows the git colors as text.
-CTERM_DIFF_FG = {"DiffAdd": "green", "DiffChange": "blue", "DiffDelete": "red", "DiffText": "blue"}
+# 256-color diffs: the diff backgrounds all land on near-identical grays, so cterm shows the git colors as
+# text, and the changed words (DiffText) sit on Selection.
+CTERM_DIFF = {"DiffAdd": ("green", None), "DiffChange": ("blue", None), "DiffDelete": ("red", None),
+              "DiffText": (None, "selection")}
 
 HEADER = """\
 " Deepwick for Vim (https://github.com/deepwick/vim).
@@ -135,6 +137,19 @@ let g:colors_name = 'deepwick'
 """
 
 
+# python.vim force-links True/False/None to Function (`hi! def link`) whenever it loads,
+# so restate the Boolean link after it, while deepwick is the active scheme.
+PYTHON_CONSTANTS = """\
+augroup deepwick_python
+  autocmd!
+  autocmd Syntax python if get(g:, 'colors_name', '') ==# 'deepwick'
+        \\ | hi! link pythonBoolean Boolean | hi! link pythonConstant Boolean | endif
+augroup END
+hi! link pythonBoolean Boolean
+hi! link pythonConstant Boolean
+"""
+
+
 def _hi(palette: Palette, group: str, fg, bg, attrs, sp) -> str:
     c = palette.colors
 
@@ -143,8 +158,8 @@ def _hi(palette: Palette, group: str, fg, bg, attrs, sp) -> str:
 
     gui = ",".join(attrs) or "NONE"
     ctermfg, ctermbg = cterm(fg), "NONE" if bg == "background" else cterm(bg)
-    if group in CTERM_DIFF_FG:
-        ctermfg, ctermbg = cterm(CTERM_DIFF_FG[group]), "NONE"
+    if group in CTERM_DIFF:
+        ctermfg, ctermbg = (cterm(name) for name in CTERM_DIFF[group])
     if sp and fg is None:
         ctermfg = cterm(sp)
     fields = [
@@ -161,7 +176,7 @@ def render_colors(palette: Palette) -> str:
     lines += [_hi(palette, group, *spec) for group, spec in GROUPS.items()]
     lines.append("")
     lines += [f"hi! link {group} {target}" for group, target in LINKS.items()]
-    lines.append("")
+    lines += ["", PYTHON_CONSTANTS]
     ansi = ", ".join(f"'{palette.ansi[key]}'" for key in ANSI_KEYS)
     lines.append(f"let g:terminal_ansi_colors = [{ansi}]")
     return "\n".join(lines) + "\n"
