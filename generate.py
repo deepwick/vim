@@ -137,12 +137,14 @@ let g:colors_name = 'deepwick'
 """
 
 
-# python.vim force-links True/False/None to Function (`hi! def link`) whenever it loads,
-# so restate the Boolean link after it, while deepwick is the active scheme.
+# python.vim force-links True/False/None to Function (`hi! def link`) whenever it loads, and
+# Vim 9.1's lists them as pythonBuiltin; so re-declare them as pythonBoolean and restate the
+# Boolean link after it, while deepwick is the active scheme.
 PYTHON_CONSTANTS = """\
 augroup deepwick_python
   autocmd!
   autocmd Syntax python if get(g:, 'colors_name', '') ==# 'deepwick'
+        \\ | syn keyword pythonBoolean False True None
         \\ | hi! link pythonBoolean Boolean | hi! link pythonConstant Boolean | endif
 augroup END
 hi! link pythonBoolean Boolean

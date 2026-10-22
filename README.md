@@ -66,6 +66,8 @@ replace Red, command line Yellow. lightline isn't covered.
     and enum members aren't highlighted.
   - A C `#define` line is Magenta as a whole: Vim gives the directive and the
     macro name one group. `#include` and `#if` lines are bold.
+- Vim's Python syntax colors `True`, `False` and `None` like functions, so the
+  theme re-declares them as `pythonBoolean` (Blue) when a Python file loads.
 - gVim works, but the theme targets terminal Vim.
 - `colors/deepwick.vim` and the airline theme are generated: run `PYTHONPATH=../spec python3 generate.py`
   with a [deepwick spec](https://github.com/deepwick/spec) checkout next to

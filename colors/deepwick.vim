@@ -118,6 +118,7 @@ hi! link cDefine Macro
 augroup deepwick_python
   autocmd!
   autocmd Syntax python if get(g:, 'colors_name', '') ==# 'deepwick'
+        \ | syn keyword pythonBoolean False True None
         \ | hi! link pythonBoolean Boolean | hi! link pythonConstant Boolean | endif
 augroup END
 hi! link pythonBoolean Boolean

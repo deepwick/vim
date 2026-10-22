@@ -322,3 +322,23 @@ def test_python_constants_are_keywords(tmp_path, truecolor):
     want = hexof("blue") if truecolor else f"ansi256:{nearest_index(C['blue'])}"
     for token in ("None", "True", "False"):
         assert style_of(out, token)["fg"] == want, token
+
+
+@requires_vim
+def test_python_constants_with_older_python_syntax(tmp_path):
+    # Vim 9.1 (Ubuntu 24.04) lists True/False/None as pythonBuiltin, linked to Function.
+    old = tmp_path / "old" / "syntax"
+    old.mkdir(parents=True)
+    (old / "python.vim").write_text(
+        "syn keyword pythonStatement False None True\n"
+        "syn keyword pythonBuiltin False True None\n"
+        "syn match pythonAssign '\\<value\\>'\n"
+        "hi def link pythonStatement Statement\n"
+        "hi def link pythonBuiltin Function\n"
+        "let b:current_syntax = 'python'\n"
+    )
+    rc = vimrc(tmp_path)
+    rc.write_text(f"set rtp^={old.parent}\n" + rc.read_text())
+    out = capture(f"vim -Nu {rc} -i NONE {SAMPLES / 'constants.py'}", isolated_env(tmp_path), size=(60, 6), wait_for="value")
+    for token in ("None", "True", "False"):
+        assert style_of(out, token)["fg"] == hexof("blue"), token
