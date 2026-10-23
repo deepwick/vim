@@ -54,7 +54,9 @@ replace Red, command line Yellow. lightline isn't covered.
   need `let &t_8f = "\e[38;2;%lu;%lu;%lum"` and
   `let &t_8b = "\e[48;2;%lu;%lu;%lum"` for 24-bit color.
 - In 256-color mode diffs use tinted backgrounds from Deepwick's 256-color
-  palette; they are brighter than the 24-bit ones.
+  palette; they are brighter than the 24-bit ones. Added lines show plain
+  Foreground text there, because syntax colors are hard to read on the
+  256-color added tint.
 - Vim's built-in syntax files are coarser than Tree-sitter, so some colors
   differ from the [Neovim port](https://github.com/deepwick/neovim) and
   [bat](https://github.com/deepwick/bat):

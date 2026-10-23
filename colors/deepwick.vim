@@ -53,7 +53,7 @@ hi SpellBad guifg=NONE guibg=NONE gui=undercurl ctermfg=203 ctermbg=NONE cterm=u
 hi SpellCap guifg=NONE guibg=NONE gui=undercurl ctermfg=187 ctermbg=NONE cterm=underline guisp=#DCDCAA
 hi SpellLocal guifg=NONE guibg=NONE gui=undercurl ctermfg=39 ctermbg=NONE cterm=underline guisp=#4FC1FF
 hi SpellRare guifg=NONE guibg=NONE gui=undercurl ctermfg=176 ctermbg=NONE cterm=underline guisp=#C586C0
-hi DiffAdd guifg=NONE guibg=#152424 gui=NONE ctermfg=NONE ctermbg=23 cterm=NONE
+hi DiffAdd guifg=NONE guibg=#152424 gui=NONE ctermfg=188 ctermbg=23 cterm=NONE
 hi DiffChange guifg=NONE guibg=#142240 gui=NONE ctermfg=NONE ctermbg=17 cterm=NONE
 hi DiffDelete guifg=#F44747 guibg=#341123 gui=NONE ctermfg=203 ctermbg=52 cterm=NONE
 hi DiffText guifg=NONE guibg=#1D3252 gui=NONE ctermfg=NONE ctermbg=18 cterm=NONE

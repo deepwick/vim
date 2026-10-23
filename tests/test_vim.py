@@ -344,3 +344,9 @@ def test_python_constants_with_older_python_syntax(tmp_path):
     out = capture(f"vim -Nu {rc} -i NONE {SAMPLES / 'constants.py'}", isolated_env(tmp_path), size=(60, 6), wait_for="value")
     for token in ("None", "True", "False"):
         assert style_of(out, token)["fg"] == hexof("blue"), token
+
+
+def test_cterm_diff_add_uses_foreground_text():
+    spec = resolve("DiffAdd")
+    assert spec["guifg"] == "NONE"
+    assert spec["ctermfg"] == str(idx("foreground")) and spec["ctermbg"] == str(idx("diffAdded"))

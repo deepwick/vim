@@ -146,6 +146,10 @@ hi! link pythonConstant Boolean
 """
 
 
+# Syntax colors on the 256-color diffAdded tint (23) fall to ~2:1, so added lines show plain text there.
+CTERM_FG = {"DiffAdd": "foreground"}
+
+
 def cterm(palette: Palette, name: str | None) -> str:
     return "NONE" if name is None else str(palette.xterm256[name])
 
@@ -156,6 +160,8 @@ def _hi(palette: Palette, group: str, fg, bg, attrs, sp) -> str:
     ctermfg, ctermbg = cterm(palette, fg), "NONE" if bg == "background" else cterm(palette, bg)
     if sp and fg is None:
         ctermfg = cterm(palette, sp)
+    if group in CTERM_FG:
+        ctermfg = cterm(palette, CTERM_FG[group])
     fields = [
         f"guifg={c[fg] if fg else 'NONE'}", f"guibg={c[bg] if bg else 'NONE'}", f"gui={gui}",
         f"ctermfg={ctermfg}", f"ctermbg={ctermbg}", f"cterm={gui.replace('undercurl', 'underline')}",
