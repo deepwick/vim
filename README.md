@@ -44,17 +44,17 @@ replace Red, command line Yellow. lightline isn't covered.
 ## Notes
 
 - `set termguicolors` gives the exact Deepwick colors. Without it, Vim uses
-  the nearest 256-color matches and leaves the background to the terminal,
-  so pair it with a Deepwick terminal theme
+  [Deepwick's 256-color palette](https://github.com/deepwick/spec#256-color-palette)
+  and leaves the background to the terminal, so pair it with a Deepwick
+  terminal theme
   ([Konsole](https://github.com/deepwick/konsole),
   [Ptyxis](https://github.com/deepwick/ptyxis),
   [Alacritty](https://github.com/deepwick/alacritty),
   [Ghostty](https://github.com/deepwick/ghostty)). Inside tmux, Vim may also
   need `let &t_8f = "\e[38;2;%lu;%lu;%lum"` and
   `let &t_8b = "\e[48;2;%lu;%lu;%lum"` for 24-bit color.
-- In 256-color mode the diff backgrounds would all turn the same dark gray,
-  so diffs show green, blue and red text instead, with the changed words on
-  Selection.
+- In 256-color mode diffs use tinted backgrounds from Deepwick's 256-color
+  palette; they are brighter than the 24-bit ones.
 - Vim's built-in syntax files are coarser than Tree-sitter, so some colors
   differ from the [Neovim port](https://github.com/deepwick/neovim) and
   [bat](https://github.com/deepwick/bat):

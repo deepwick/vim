@@ -9,7 +9,6 @@ from deepwick_spec.ansi import line_with, runs, style_of
 from deepwick_spec.check_port import check_port
 from deepwick_spec.palette import ANSI_KEYS, load_palette
 from deepwick_spec.tui import capture, tmux_available
-from deepwick_spec.xterm256 import nearest_index
 
 REPO = Path(__file__).resolve().parents[1]
 SAMPLES = Path(__file__).resolve().parent / "samples"
@@ -17,8 +16,13 @@ PALETTE = load_palette()
 C = PALETTE.colors
 sys.path.insert(0, str(REPO))
 COLORS = REPO / "colors" / "deepwick.vim"
+NAME_BY_HEX = {v.lower(): k for k, v in C.items()}
 
 requires_vim = pytest.mark.skipif(not (tmux_available() and shutil.which("vim")), reason="requires tmux and vim")
+
+
+def idx(name):
+    return PALETTE.xterm256[name]
 
 
 def hexof(name):
@@ -58,8 +62,8 @@ def test_every_hi_line_has_gui_and_cterm():
             continue
         for gui, cterm in (("guifg", "ctermfg"), ("guibg", "ctermbg")):
             assert gui in spec and cterm in spec, group
-            if spec[gui] != "NONE" and spec[cterm] != "NONE" and not group.startswith("Diff"):
-                assert int(spec[cterm]) == nearest_index(spec[gui]), (group, gui)
+            if spec[gui] != "NONE" and spec[cterm] != "NONE":
+                assert int(spec[cterm]) == idx(NAME_BY_HEX[spec[gui].lower()]), (group, gui)
             if spec[cterm] != "NONE":
                 assert int(spec[cterm]) >= 16, (group, cterm)
         assert spec["cterm"] == spec["gui"].replace("undercurl", "underline"), group
@@ -170,19 +174,17 @@ def test_vert_split_follows_win_separator():
 def test_spell_undercurls(group, color):
     spec = resolve(group)
     assert spec["guisp"].lower() == hexof(color) and "undercurl" in gui_attrs(spec)
-    assert spec["cterm"] == "underline" and spec["ctermfg"] == str(nearest_index(C[color]))
+    assert spec["cterm"] == "underline" and spec["ctermfg"] == str(idx(color))
 
 
-@pytest.mark.parametrize(("group", "color"), [("DiffAdd", "green"), ("DiffChange", "blue"), ("DiffDelete", "red")])
-def test_cterm_diffs_use_git_colors(group, color):
+@pytest.mark.parametrize(("group", "bg"), [("DiffAdd", "diffAdded"), ("DiffChange", "diffChanged"),
+                                          ("DiffDelete", "diffRemoved"), ("DiffText", "diffText")])
+def test_cterm_diffs_use_tinted_backgrounds(group, bg):
     spec = resolve(group)
-    assert spec["ctermfg"] == str(nearest_index(C[color])) and spec["ctermbg"] == "NONE"
-
-
-def test_cterm_diff_text_stands_out_from_diff_change():
-    spec = resolve("DiffText")
-    assert spec["ctermbg"] == str(nearest_index(C["selection"]))
-    assert (spec["ctermfg"], spec["ctermbg"]) != (resolve("DiffChange")["ctermfg"], resolve("DiffChange")["ctermbg"])
+    assert spec["ctermbg"] == str(idx(bg))
+    assert spec["guibg"].lower() == hexof(bg)
+    if group == "DiffDelete":
+        assert spec["ctermfg"] == str(idx("red"))
 
 
 VIM_ONLY = {
@@ -246,7 +248,7 @@ def test_renders_truecolor(tmp_path):
 def test_renders_256(tmp_path):
     out = vim(tmp_path, "sample.py", truecolor=False)
     for token, color in PY_TOKENS:
-        assert style_of(out, token)["fg"] == f"ansi256:{nearest_index(C[color])}", token
+        assert style_of(out, token)["fg"] == f"ansi256:{idx(color)}", token
 
 
 @requires_vim
@@ -281,7 +283,7 @@ def test_airline_has_no_nvim_guard():
 
 
 def entry(fg, bg, attr=""):
-    return [C[fg], C[bg], nearest_index(C[fg]), nearest_index(C[bg]), attr]
+    return [C[fg], C[bg], idx(fg), idx(bg), attr]
 
 
 @pytest.mark.skipif(shutil.which("vim") is None, reason="requires vim")
@@ -311,7 +313,7 @@ def test_airline_palette(tmp_path):
     assert palette["inactive"]["airline_a"] == entry("muted", "surface")
     for mode in ("normal", "insert", "visual", "replace"):
         assert palette[f"{mode}_modified"]["airline_c"] == entry("yellow", "surface"), mode
-    assert palette["accents"]["red"] == [C["red"], "", nearest_index(C["red"]), "", ""]
+    assert palette["accents"]["red"] == [C["red"], "", idx("red"), "", ""]
 
 
 @requires_vim
@@ -319,7 +321,7 @@ def test_airline_palette(tmp_path):
 def test_python_constants_are_keywords(tmp_path, truecolor):
     rc = vimrc(tmp_path, truecolor=truecolor)
     out = capture(f"vim -Nu {rc} -i NONE {SAMPLES / 'constants.py'}", isolated_env(tmp_path), size=(60, 6), wait_for="value")
-    want = hexof("blue") if truecolor else f"ansi256:{nearest_index(C['blue'])}"
+    want = hexof("blue") if truecolor else f"ansi256:{idx('blue')}"
     for token in ("None", "True", "False"):
         assert style_of(out, token)["fg"] == want, token
 
